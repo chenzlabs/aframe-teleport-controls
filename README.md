@@ -1,7 +1,7 @@
 # aframe-teleport-controls
 Teleport component
 
-![Screenshot](https://github.com/fernandojsg/aframe-teleport-controls/raw/master/teleport.png)
+![Screenshot](https://github.com/chenzlabs/aframe-teleport-controls/raw/master/teleport.png)
 
 ## Properties
 
@@ -36,7 +36,7 @@ Install and use by directly including the [browser files](dist):
 <head>
   <title>My A-Frame Scene</title>
   <script src="https://aframe.io/releases/0.3.2/aframe.min.js"></script>
-  <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
+  <script src="https://rawgit.com/chenzlabs/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
 </head>
 
 <body>

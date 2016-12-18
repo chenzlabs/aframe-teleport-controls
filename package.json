@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/chenzlabs/aframe-teleport-controls#readme",
   "devDependencies": {
-    "aframe": "chenzlabs/aframe#3d15d58",
+    "aframe": "chenzlabs/aframe#e7257c6",
     "cross-env": "^3.1.3",
     "gh-pages": "^0.11.0",
     "semistandard": "^8.0.0",

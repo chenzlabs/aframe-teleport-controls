@@ -17,6 +17,7 @@ AFRAME.registerComponent('teleport-controls', {
     startEvent: {default: 'start', oneOf: events},
     endEvent: {default: 'end', oneOf: events},
     collisionEntity: { type: 'selector' },
+    objects: {default: ''},
     hitEntity: {type: 'selector'},
     defaultPlaneSize: {default: 5000},
     hitCylinderColor: {type: 'color', default: '#99ff99'},
@@ -42,6 +43,7 @@ AFRAME.registerComponent('teleport-controls', {
     this.curveMissColor = new THREE.Color();
     this.curveHitColor = new THREE.Color();
     this.raycaster = new THREE.Raycaster();
+    this.refreshObjects = this.refreshObjects.bind(this);
 
     this.defaultPlane = this.createDefaultPlane();
 
@@ -96,6 +98,16 @@ AFRAME.registerComponent('teleport-controls', {
     this.el.emit('teleported', {oldCamPosition: camPosition, newCamPosition: newCamPosition, hitPoint: this.hitPoint});
   },
 
+  play: function () {
+    this.el.sceneEl.addEventListener('child-attached', this.refreshObjects);
+    this.el.sceneEl.addEventListener('child-detached', this.refreshObjects);
+  },
+
+  pause: function () {
+    this.el.sceneEl.removeEventListener('child-attached', this.refreshObjects);
+    this.el.sceneEl.removeEventListener('child-detached', this.refreshObjects);
+  },
+
   update: function (oldData) {
     this.referenceNormal.copy(this.data.landingNormal);
     this.curveMissColor.set(this.data.curveMissColor);
@@ -113,8 +125,32 @@ AFRAME.registerComponent('teleport-controls', {
       this.hitEntity = this.createHitEntity();
     }
     this.hitEntity.setAttribute('visible', false);
+
+    this.refreshObjects();
   },
 
+  /**
+   * Update list of objects to test for intersection.
+   **/
+  refreshObjects: function () {
+    var data = this.data;
+    var i;
+    var objectEls;
+
+    // Push meshes onto list of objects to intersect.
+    if (data.objects) {
+      objectEls = this.el.sceneEl.querySelectorAll(data.objects);
+      this.objects = [];
+      for (i = 0; i < objectEls.length; i++) {
+        this.objects.push(objectEls[i].object3D);
+      }
+      return;
+    }
+ 
+    // If objects not defined, intersect with everything.
+    this.objects = this.el.sceneEl.object3D.children;
+  },
+ 
   remove: function () {
     // @todo Remove entities created
   },
@@ -179,8 +215,17 @@ AFRAME.registerComponent('teleport-controls', {
     // Check intersection with the floor
     var floor = this.data.collisionEntity && this.data.collisionEntity.getObject3D('mesh');
     if (!floor) { floor = this.defaultPlane; }
+/*
     var intersects = this.raycaster.intersectObject(floor, true);
     if (intersects.length > 0 && !this.hit && this.isValidNormalsAngle(intersects[0].face.normal)) {
+*/
+    // Check if we intersected with any objects.
+    var intersects = this.raycaster.intersectObjects(this.objects, true);
+    // Only keep intersections against objects that have a reference to an entity.
+    intersects = intersects.filter(function hasEl (intersection) { return !!intersection.object.el; });
+    // Check to see if we intersected the 'floor' *first*.
+    if (intersects.length > 0 && intersects[0] == floor
+     && !this.hit && this.isValidNormalsAngle(intersects[0].face.normal)) {
       var point = intersects[0].point;
 
       this.line.material.color.set(this.curveHitColor);

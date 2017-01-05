@@ -15,8 +15,8 @@ AFRAME.registerComponent('auto-hand-controls', {
     // to make sure the tracked-controls system is present, put it on the scene (NOT an entity)
     this.el.sceneEl.setAttribute('tracked-controls', '');
 
-    this.tick = /* AFRAME.utils.throttleTick ? 
-      AFRAME.utils.throttleTick(this.throttledTick, 1000, this) : */
+    this.tick = AFRAME.utils.throttleTick ?
+      AFRAME.utils.throttleTick(this.throttledTick, 1000, this) :
       this.throttledTick.bind(this);
   },
 

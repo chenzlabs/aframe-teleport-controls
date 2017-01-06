@@ -84,7 +84,7 @@ AFRAME.registerComponent('teleport-controls', {
     // account for user height that the camera is supposed to be enforcing
     // (TODO: which should be how high they are off the ground right now, really)
     // (this.prevHeightDiff was trying to represent that value, but didn't handle world position)
-    var yoffset = cameraEl.components.camera.data.userHeight;
+    var yoffset = camPosition.y; // cameraEl.components.camera.data.userHeight;
     var newCamPositionY = camPosition.y + yoffset - camWorldPosition.y + this.hitPoint.y;
     var newCamPosition = new THREE.Vector3(this.hitPoint.x + camPosition.x - camWorldPosition.x, newCamPositionY, this.hitPoint.z + camPosition.z - camWorldPosition.z);
     var playerEl = this.data.playerEntity;

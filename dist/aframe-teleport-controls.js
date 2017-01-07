@@ -122,6 +122,8 @@
 	      return;
 	    }
 
+	    // make sure world matrix is updated
+	    this.el.sceneEl.object3D.updateMatrixWorld();
 	    // @todo Create this aux vectors outside
 	    var cameraEl = this.el.sceneEl.camera.el;
 	    var camPosition = new THREE.Vector3().copy(cameraEl.getAttribute('position'));

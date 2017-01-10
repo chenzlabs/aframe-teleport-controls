@@ -55,6 +55,35 @@
 	var buttons = ['trackpad', 'trigger', 'grip', 'menu', 'thumbstick', 'A', 'B', 'X', 'Y', 'surface', 'point', 'pointing', 'pistol', 'thumb'];
 	var events = ['down', 'up', 'open', 'close', 'start', 'end', 'touchstart', 'touchend'];
 
+	// Helper function to set (player/camera/controller) entity position.
+	function setEntityPosition(el, pos) {
+	   if (!el || !pos) { return; }
+	   if (el.body) {
+	     // when aframe-physics-system is in use, need to move the physics body
+	     el.body.position.x = pos.x;
+	     el.body.position.y = pos.y;
+	     el.body.position.z = pos.z;
+	   } else {
+	     el.setAttribute('position', pos);
+	   }
+	}
+
+	// Helper function to set (player/camera/controller) entity rotation.
+	var UP = {x:0, y:1, z:0};
+	function setEntityRotation(el, rot) {
+	   if (!el || !rot) { return; }
+	   if (el.body) {
+	     // when aframe-physics-system is in use, need to rotate the physics body
+	     // FIXME: right now, only doing Y rotation
+	     var v = el.body.position.clone(); // avoid referencing CANNON, just need any Vec3...
+	     el.body.quaternion.toEuler(v);
+	     el.body.quaternion.setFromAxisAngle(UP, THREE.Math.DEG2RAD * rot.y + v.y);
+	   } else {
+	     el.setAttribute('rotation', rot);
+	   }
+	}
+
+
 	/* global THREE AFRAME  */
 	AFRAME.registerComponent('teleport-controls', {
 	  schema: {
@@ -125,6 +154,8 @@
 	      return;
 	    }
 
+	    // TODO: consider rotation?
+
 	    // make sure world matrix is updated
 	    this.el.sceneEl.object3D.updateMatrixWorld();
 	    // @todo Create this aux vectors outside
@@ -143,10 +174,10 @@
 	      // move the player, not the camera and controllers all separately
 	      var playerPosition = new THREE.Vector3().copy(playerEl.getAttribute('position'));
 	      var newPlayerPosition = new THREE.Vector3().copy(newCamPosition).sub(camPosition).add(playerPosition);
-	      playerEl.setAttribute('position', newPlayerPosition);
+	      setEntityPosition(playerEl, newPlayerPosition);
 	      this.el.emit('teleported', {oldPlayerPosition: playerPosition, newPlayerPosition: newPlayerPosition, hitPoint: this.hitPoint});
 	    } else {
-	      cameraEl.setAttribute('position', newCamPosition);
+	      setEntityPosition(cameraEl, newCamPosition);
 
 	      // Find the hands and move them proportionally
 	      var hands = this.el.sceneEl.querySelectorAll('a-entity[tracked-controls]');
@@ -157,7 +188,7 @@
 	        var pos = new THREE.Vector3().copy(position);
 	        var diff = camPosition.clone().sub(pos);
 	        var newPosition = newCamPosition.clone().sub(diff);
-	        hands[i].setAttribute('position', newPosition);
+	        setEntityPosition(hands[i], newPosition);
 	      }
 
 	      this.el.emit('teleported', {oldCamPosition: camPosition, newCamPosition: newCamPosition, hitPoint: this.hitPoint});
